@@ -247,7 +247,7 @@ class COLLOC_COMM():
             elif 'S2_LandSeaMask' in global_keys:
                 self.LandSeaMask2 = hdf5File.get('S2_LandSeaMask')[:]
 
-            for band in modeCfg['chan1']:
+            for band in MCFG['chan1']:
                 band_keys = hdf5File.get(band).keys()
                 if 'MaskFine' in band_keys:
                     self.MaskFine[band] = hdf5File.get(band)['MaskFine'][:]
