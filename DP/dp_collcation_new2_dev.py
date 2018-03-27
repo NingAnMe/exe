@@ -198,6 +198,132 @@ class COLLOC_COMM():
             self.SV2[band] = np.full((row, col), self.FillValue, self.dtype)
             self.BB2[band] = np.full((row, col), self.FillValue, self.dtype)
 
+    def remask_load(self, ICFG, MCFG):
+        """
+        :param modeCfg: 配置文件
+        :return:
+        """
+        i_file = ICFG.ofile
+        with h5py.File(i_file, 'r') as hdf5File:
+            global_keys = hdf5File.keys()
+            if 'MaskRough' in global_keys:
+                self.MaskRough = hdf5File.get('MaskRough')[:]
+
+            elif 'S1_Time' in global_keys:
+                self.Time1 = hdf5File.get('S1_Time')[:]
+            elif 'S1_Lon' in global_keys:
+                self.Lon1 = hdf5File.get('S1_Lon')[:]
+            elif 'S1_Lat' in global_keys:
+                self.Lat1 = hdf5File.get('S1_Lat')[:]
+            elif 'S1_SatA' in global_keys:
+                self.SatA1 = hdf5File.get('S1_SatA')[:]
+            elif 'S1_SatZ' in global_keys:
+                self.SatZ1 = hdf5File.get('S1_SatZ')[:]
+            elif 'S1_SunA' in global_keys:
+                self.SunA1 = hdf5File.get('S1_SunA')[:]
+            elif 'S1_SunZ' in global_keys:
+                self.SunZ1 = hdf5File.get('S1_SunZ')[:]
+            elif 'S1_LandCover' in global_keys:
+                self.LandCover1 = hdf5File.get('S1_LandCover')[:]
+            elif 'S1_LandSeaMask' in global_keys:
+                self.LandSeaMask1 = hdf5File.get('S1_LandSeaMask')[:]
+
+            elif 'S2_Time' in global_keys:
+                self.Time2 = hdf5File.get('S2_Time')[:]
+            elif 'S2_Lon' in global_keys:
+                self.Lon2 = hdf5File.get('S2_Lon')[:]
+            elif 'S2_Lat' in global_keys:
+                self.Lat2 = hdf5File.get('S2_Lat')[:]
+            elif 'S2_SatA' in global_keys:
+                self.SatA2 = hdf5File.get('S2_SatA')[:]
+            elif 'S2_SatZ' in global_keys:
+                self.SatZ2 = hdf5File.get('S2_SatZ')[:]
+            elif 'S2_SunA' in global_keys:
+                self.SunA2 = hdf5File.get('S2_SunA')[:]
+            elif 'S2_SunZ' in global_keys:
+                self.SunZ2 = hdf5File.get('S2_SunZ')[:]
+            elif 'S2_LandCover' in global_keys:
+                self.LandCover2 = hdf5File.get('S2_LandCover')[:]
+            elif 'S2_LandSeaMask' in global_keys:
+                self.LandSeaMask2 = hdf5File.get('S2_LandSeaMask')[:]
+
+            for band in modeCfg['chan1']:
+                band_keys = hdf5File.get(band).keys()
+                if 'MaskFine' in band_keys:
+                    self.MaskFine[band] = hdf5File.get(band)['MaskFine'][:]
+
+                elif 'S1_FovDnMean' in band_keys:
+                    self.FovDnMean1[band] = hdf5File.get(band)['S1_FovDnMean'][:]
+                elif 'S1_FovRefMean' in band_keys:
+                    self.FovRefMean1[band] = hdf5File.get(band)['S1_FovRefMean'][:]
+                elif 'S1_FovRefStd' in band_keys:
+                    self.FovRefStd1[band] = hdf5File.get(band)['S1_FovRefStd'][:]
+                elif 'S1_FovRadMean' in band_keys:
+                    self.FovRadMean1[band] = hdf5File.get(band)['S1_FovRadMean'][:]
+                elif 'S1_FovRadStd' in band_keys:
+                    self.FovRadStd1[band] = hdf5File.get(band)['S1_FovRadStd'][:]
+                elif 'S1_FovTbbMean' in band_keys:
+                    self.FovTbbMean1[band] = hdf5File.get(band)['S1_FovTbbMean'][:]
+                elif 'S1_FovTbbStd' in band_keys:
+                    self.FovTbbStd1[band] = hdf5File.get(band)['S1_FovTbbStd'][:]
+
+                elif 'S1_EnvDnMean' in band_keys:
+                    self.EnvDnMean1[band] = hdf5File.get(band)['S1_EnvDnMean'][:]
+                elif 'S1_EnvDnStd' in band_keys:
+                    self.EnvDnStd1[band] = hdf5File.get(band)['S1_EnvDnStd'][:]
+                elif 'S1_EnvRefMean' in band_keys:
+                    self.EnvRefMean1[band] = hdf5File.get(band)['S1_EnvRefMean'][:]
+                elif 'S1_EnvRefStd' in band_keys:
+                    self.EnvRefStd1[band] = hdf5File.get(band)['S1_EnvRefStd'][:]
+                elif 'S1_EnvRadMean' in band_keys:
+                    self.EnvRadMean1[band] = hdf5File.get(band)['S1_EnvRadMean'][:]
+                elif 'S1_EnvRadStd' in band_keys:
+                    self.EnvRadStd1[band] = hdf5File.get(band)['S1_EnvRadStd'][:]
+                elif 'S1_EnvTbbMean' in band_keys:
+                    self.EnvTbbMean1[band] = hdf5File.get(band)['S1_EnvTbbMean'][:]
+                elif 'S1_EnvTbbStd' in band_keys:
+                    self.EnvTbbStd1[band] = hdf5File.get(band)['S1_EnvTbbStd'][:]
+                elif 'S1_SV' in band_keys:
+                    self.SV1[band] = hdf5File.get(band)['S1_SV'][:]
+                elif 'S1_BB' in band_keys:
+                    self.BB1[band] = hdf5File.get(band)['S1_BB'][:]
+
+                elif 'S2_FovDnMean' in band_keys:
+                    self.FovDnMean2[band] = hdf5File.get(band)['S2_FovDnMean'][:]
+                elif 'S2_FovRefMean' in band_keys:
+                    self.FovRefMean2[band] = hdf5File.get(band)['S2_FovRefMean'][:]
+                elif 'S2_FovRefStd' in band_keys:
+                    self.FovRefStd2[band] = hdf5File.get(band)['S2_FovRefStd'][:]
+                elif 'S2_FovRadMean' in band_keys:
+                    self.FovRadMean2[band] = hdf5File.get(band)['S2_FovRadMean'][:]
+                elif 'S2_FovRadStd' in band_keys:
+                    self.FovRadStd2[band] = hdf5File.get(band)['S2_FovRadStd'][:]
+                elif 'S2_FovTbbMean' in band_keys:
+                    self.FovTbbMean2[band] = hdf5File.get(band)['S2_FovTbbMean'][:]
+                elif 'S2_FovTbbStd' in band_keys:
+                    self.FovTbbStd2[band] = hdf5File.get(band)['S2_FovTbbStd'][:]
+
+                elif 'S2_EnvDnMean' in band_keys:
+                    self.EnvDnMean2[band] = hdf5File.get(band)['S2_EnvDnMean'][:]
+                elif 'S2_EnvDnStd' in band_keys:
+                    self.EnvDnStd2[band] = hdf5File.get(band)['S2_EnvDnStd'][:]
+                elif 'S2_EnvRefMean' in band_keys:
+                    self.EnvRefMean2[band] = hdf5File.get(band)['S2_EnvRefMean'][:]
+                elif 'S2_EnvRefStd' in band_keys:
+                    self.EnvRefStd2[band] = hdf5File.get(band)['S2_EnvRefStd'][:]
+                elif 'S2_EnvRadMean' in band_keys:
+                    self.EnvRadMean2[band] = hdf5File.get(band)['S2_EnvRadMean'][:]
+                elif 'S2_EnvRadStd' in band_keys:
+                    self.EnvRadStd2[band] = hdf5File.get(band)['S2_EnvRadStd'][:]
+                elif 'S2_EnvTbbMean' in band_keys:
+                    self.EnvTbbMean2[band] = hdf5File.get(band)['S2_EnvTbbMean'][:]
+                elif 'S2_EnvTbbStd' in band_keys:
+                    self.EnvTbbStd2[band] = hdf5File.get(band)['S2_EnvTbbStd'][:]
+                elif 'S2_SV' in band_keys:
+                    self.SV2[band] = hdf5File.get(band)['S2_SV'][:]
+                elif 'S2_BB' in band_keys:
+                    self.BB2[band] = hdf5File.get(band)['S2_BB'][:]
+
     def save_rough_data(self, P1, P2, D1, D2, modeCfg):
         '''
         第一轮匹配，根据查找表进行数据的mean和std计算，并且对全局物理量复制（角度，经纬度，时间等）
