@@ -264,8 +264,8 @@ if __name__ == '__main__':
         print 'input args error exit'
         sys.exit(-1)
 
-    # 统计运行时间
-    T1 = datetime.now()
+    # 统计整体运行时间
+    T_all_1 = datetime.now()
     main(inYamlFile)
-    T2 = datetime.now()
-    print 'times:', (T2 - T1).total_seconds()
+    T_all_2 = datetime.now()
+    print 'times:', (T_all_2 - T_all_1).total_seconds()
