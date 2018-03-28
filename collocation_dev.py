@@ -149,7 +149,7 @@ def draw_dclc(DCLC, ICFG, MCFG):
             else:
                 min = MCFG.axis_tbb[Band][0]
                 max = MCFG.axis_tbb[Band][1]
-            print 'tbb', Band,min,max
+            print 'tbb', Band, min, max
             regression(x, y, min, max, flag, ICFG, MCFG, Band)
 
 
@@ -164,7 +164,12 @@ def main(inYamlFile):
     MCFG = ReadModeYaml(modeFile)
     DCLC = COLLOC_COMM(ICFG.row, ICFG.col, MCFG.chan1)  # DCLC = DATA DCLC 匹配结果类
 
-    rewrite_mask = True
+    # 判断是否重写
+    if os.path.isfile(ICFG.ofile):
+        rewrite_mask = True
+    else:
+        rewrite_mask = False
+
     if not rewrite_mask:
         ##########03 解析 第一颗传感器的L1数据 ##########
         for inFile in ICFG.ifile1:
