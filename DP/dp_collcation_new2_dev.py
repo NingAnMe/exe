@@ -830,7 +830,7 @@ class COLLOC_COMM(object):
                 print u'%s %s 云判识开启，匹配点个数，晴空 %d 云区 %d 总计：%d' % (Band1, flag, len(idx_clear[0]), len(idx_cloud[0]), totalNums)
                 self.MaskFine[Band1][idx_cloud] = 1
 
-    def rewrite_data(self, ICFG, MCFG):
+    def rewrite_hdf5(self, ICFG, MCFG):
         """
         :param ICFG: 输入配置文件
         :param MCFG: 阈值配置文件
@@ -845,135 +845,223 @@ class COLLOC_COMM(object):
                 dset = hdf5File.get('%s/MaskFine' % band)
                 dset[...] = self.MaskFine.get('%s' % band)
 
+    def write_hdf5(self, ICFG, MCFG):
 
-def write_dclc(DCLC, ICFG, MCFG):
+        print u'输出产品'
+        for band in MCFG.chan1:
+            idx = np.where(self.MaskFine[band] > 0)
+            DCLC_nums = len(idx[0])
+            if DCLC_nums > 0:
+                break
+        if DCLC_nums == 0:
+            print('colloc point is zero')
+            sys.exit(-1)
 
-    print u'输出产品'
-    for band in MCFG.chan1:
-        idx = np.where(DCLC.MaskFine[band] > 0)
-        DCLC_nums = len(idx[0])
-        if DCLC_nums > 0:
-            break
-    if DCLC_nums == 0:
-        print('colloc point is zero')
-        sys.exit(-1)
+        # 根据卫星性质来命名数据集，固定标识，避免命名烦恼 烦恼 烦恼
+        NameHead1 = 'S1_'
+        NameHead2 = 'S2_'
+        # 创建文件夹
+        MainPath, MainFile = os.path.split(ICFG.ofile)
+        if not os.path.isdir(MainPath):
+            os.makedirs(MainPath)
 
-    # 根据卫星性质来命名数据集，固定标识，避免命名烦恼 烦恼 烦恼
-    NameHead1 = 'S1_'
-    NameHead2 = 'S2_'
-    # 创建文件夹
+        # 创建hdf5文件
+        h5File_W = h5py.File(ICFG.ofile, 'w')
+
+        if self.spec_MaskRough_value is not None:
+            dset = h5File_W.create_dataset('%sSpec_MaskRough_value' % NameHead2, dtype='f4', data=self.spec_MaskRough_value, compression='gzip', compression_opts=5, shuffle=True)
+            h5File_W.create_dataset('%sSpec_MaskRough_row' % NameHead2, dtype='i2', data=self.spec_MaskRough_row, compression='gzip', compression_opts=5, shuffle=True)
+            h5File_W.create_dataset('/%sSpec_MaskRough_col' % NameHead2, dtype='i2', data=self.spec_MaskRough_col, compression='gzip', compression_opts=5, shuffle=True)
+
+            dset.attrs.create('Long_name', 'Record spectral lines obtained from MaskRough dataset', shape=(1,), dtype='S64')
+        # 生成 h5,首先写入全局变量
+        # 第一颗传感器的全局数据信息
+        h5File_W.create_dataset('%sLon' % NameHead1, dtype='f4', data=self.Lon1, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sLat' % NameHead1, dtype='f4', data=self.Lat1, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sTime' % NameHead1, dtype='f4', data=self.Time1, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sSatA' % NameHead1, dtype='f4', data=self.SatA1, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sSatZ' % NameHead1, dtype='f4', data=self.SatZ1, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sSoA' % NameHead1, dtype='f4', data=self.SunA1, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sSoZ' % NameHead1, dtype='f4', data=self.SunZ1, compression='gzip', compression_opts=5, shuffle=True)
+
+        if self.LandCover1 is not None:
+            h5File_W.create_dataset('%sLandCover' % NameHead1, dtype='f4', data=self.LandCover1, compression='gzip', compression_opts=5, shuffle=True)
+        if self.LandSeaMask1 is not None:
+            h5File_W.create_dataset('%sLandSeaMask' % NameHead1, dtype='f4', data=self.LandSeaMask1, compression='gzip', compression_opts=5, shuffle=True)
+
+        # 第二颗传感器的全局数据信息
+        h5File_W.create_dataset('%sLon' % NameHead2, dtype='f4', data=self.Lon2, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sLat' % NameHead2, dtype='f4', data=self.Lat2, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sTime' % NameHead2, dtype='f4', data=self.Time2, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sSatA' % NameHead2, dtype='f4', data=self.SatA2, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sSatZ' % NameHead2, dtype='f4', data=self.SatZ2, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sSoA' % NameHead2, dtype='f4', data=self.SunA2, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sSoZ' % NameHead2, dtype='f4', data=self.SunZ2, compression='gzip', compression_opts=5, shuffle=True)
+
+        if self.LandCover2 is not None:
+            h5File_W.create_dataset('%sLandCover' % NameHead2, dtype='f4', data=self.LandCover2, compression='gzip', compression_opts=5, shuffle=True)
+        if self.LandSeaMask2 is not None:
+            h5File_W.create_dataset('%sLandSeaMask' % NameHead2, dtype='f4', data=self.LandSeaMask2, compression='gzip', compression_opts=5, shuffle=True)
+
+        # 写入掩码属性
+        dset = h5File_W.create_dataset('MaskRough', dtype='u2', data=self.MaskRough, compression='gzip', compression_opts=5, shuffle=True)
+        dset.attrs.create('Long_name', 'after time and angle collocation', shape=(1,), dtype='S32')
+        # 写入公共区域属性
+        h5File_W.create_dataset('PubIdx', dtype='u2', data=self.PubIdx, compression='gzip', compression_opts=5, shuffle=True)
+
+        # 写入1通道数据信息
+        for Band in MCFG.chan1:
+            ###################### 第一颗传感器通道数据 ########################
+
+            if self.SV1[Band] is not None:
+                h5File_W.create_dataset('/%s/%sSV' % (Band, NameHead1), dtype='f4', data=self.SV1[Band], compression='gzip', compression_opts=5, shuffle=True)
+            if self.BB1[Band] is not None:
+                h5File_W.create_dataset('/%s/%sBB' % (Band, NameHead1), dtype='f4', data=self.BB1[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            if self.FovDnMean1[Band] is not None:
+                h5File_W.create_dataset('/%s/%sFovDnMean' % (Band, NameHead1), dtype='f4', data=self.FovDnMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sFovDnStd' % (Band, NameHead1), dtype='f4', data=self.FovDnStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvDnMean' % (Band, NameHead1), dtype='f4', data=self.EnvDnMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvDnStd' % (Band, NameHead1), dtype='f4', data=self.EnvDnStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            if self.FovRefMean1[Band] is not None:
+                h5File_W.create_dataset('/%s/%sFovRefMean' % (Band, NameHead1), dtype='f4', data=self.FovRefMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sFovRefStd' % (Band, NameHead1), dtype='f4', data=self.FovRefStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvRefMean' % (Band, NameHead1), dtype='f4', data=self.EnvRefMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvRefStd' % (Band, NameHead1), dtype='f4', data=self.EnvRefStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            if self.FovRadMean1[Band] is not None:
+                h5File_W.create_dataset('/%s/%sFovRadMean' % (Band, NameHead1), dtype='f4', data=self.FovRadMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sFovRadStd' % (Band, NameHead1), dtype='f4', data=self.FovRadStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvRadMean' % (Band, NameHead1), dtype='f4', data=self.EnvRadMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvRadStd' % (Band, NameHead1), dtype='f4', data=self.EnvRadStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            if self.FovTbbMean1[Band] is not None:
+                h5File_W.create_dataset('/%s/%sFovTbbMean' % (Band, NameHead1), dtype='f4', data=self.FovTbbMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sFovTbbStd' % (Band, NameHead1), dtype='f4', data=self.FovTbbStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvTbbMean' % (Band, NameHead1), dtype='f4', data=self.EnvTbbMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvTbbStd' % (Band, NameHead1), dtype='f4', data=self.EnvTbbStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            ###################### 第二颗传感器通道数据 ########################
+            if self.SV2[Band] is not None:
+                h5File_W.create_dataset('/%s/%sSV' % (Band, NameHead2), dtype='f4', data=self.SV2[Band], compression='gzip', compression_opts=5, shuffle=True)
+            if self.BB2[Band] is not None:
+                h5File_W.create_dataset('/%s/%sBB' % (Band, NameHead2), dtype='f4', data=self.BB2[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            if self.FovDnMean2[Band] is not None:
+                h5File_W.create_dataset('/%s/%sFovDnMean' % (Band, NameHead2), dtype='f4', data=self.FovDnMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sFovDnStd' % (Band, NameHead2), dtype='f4', data=self.FovDnStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvDnMean' % (Band, NameHead2), dtype='f4', data=self.EnvDnMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvDnStd' % (Band, NameHead2), dtype='f4', data=self.EnvDnStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            if self.FovRefMean2[Band] is not None:
+                h5File_W.create_dataset('/%s/%sFovRefMean' % (Band, NameHead2), dtype='f4', data=self.FovRefMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sFovRefStd' % (Band, NameHead2), dtype='f4', data=self.FovRefStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvRefMean' % (Band, NameHead2), dtype='f4', data=self.EnvRefMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvRefStd' % (Band, NameHead2), dtype='f4', data=self.EnvRefStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            if self.FovRadMean2[Band] is not None:
+                h5File_W.create_dataset('/%s/%sFovRadMean' % (Band, NameHead2), dtype='f4', data=self.FovRadMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sFovRadStd' % (Band, NameHead2), dtype='f4', data=self.FovRadStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvRadMean' % (Band, NameHead2), dtype='f4', data=self.EnvRadMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvRadStd' % (Band, NameHead2), dtype='f4', data=self.EnvRadStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            if self.FovTbbMean2[Band] is not None:
+                h5File_W.create_dataset('/%s/%sFovTbbMean' % (Band, NameHead2), dtype='f4', data=self.FovTbbMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sFovTbbStd' % (Band, NameHead2), dtype='f4', data=self.FovTbbStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvTbbMean' % (Band, NameHead2), dtype='f4', data=self.EnvTbbMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
+                h5File_W.create_dataset('/%s/%sEnvTbbStd' % (Band, NameHead2), dtype='f4', data=self.EnvTbbStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
+
+            dset = h5File_W.create_dataset('/%s/MaskFine' % Band, dtype='u2', data=self.MaskFine[Band], compression='gzip', compression_opts=5, shuffle=True)
+            dset.attrs.create('Long_name', 'after scene homogenous collocation', shape=(1,), dtype='S32')
+
+        h5File_W.close()
+
+    def draw_dclc(self, ICFG, MCFG):
+
+        print u'产品绘图'
+
+        for Band in MCFG.chan1:
+            idx = np.where(self.MaskFine[Band] > 0)
+            if self.FovRefMean1[Band] is not None:
+                x = self.FovRefMean1[Band][idx]
+                y = self.FovRefMean2[Band][idx]
+                if len(x) < 2:
+                    continue
+                flag = 'Ref'
+                if MCFG.AutoRange:
+                    value_min = np.min([np.min(x), np.min(y)])
+                    value_max = np.max([np.max(x), np.max(y)])
+                else:
+                    value_min = MCFG.axis_ref[Band][0]
+                    value_max = MCFG.axis_ref[Band][1]
+
+                regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band)
+
+            if self.FovRadMean1[Band] is not None:
+                x = self.FovRadMean1[Band][idx]
+                y = self.FovRadMean2[Band][idx]
+                if len(x) < 2:
+                    continue
+                flag = 'Rad'
+                print 'rad', Band, np.min(x), np.max(x), np.min(y), np.max(y)
+                if MCFG.AutoRange:
+                    value_min = np.min([np.min(x), np.min(y)])
+                    value_max = np.max([np.max(x), np.max(y)])
+                else:
+                    value_min = MCFG.axis_rad[Band][0]
+                    value_max = MCFG.axis_rad[Band][1]
+
+                regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band)
+
+            if self.FovTbbMean1[Band] is not None:
+                x = self.FovTbbMean1[Band][idx]
+                y = self.FovTbbMean2[Band][idx]
+                if len(x) < 2:
+                    continue
+                flag = 'Tbb'
+                print 'tbb', Band, np.min(x), np.max(x), np.min(y), np.max(y)
+                if MCFG.AutoRange:
+                    value_min = np.min([np.min(x), np.min(y)])
+                    value_max = np.max([np.max(x), np.max(y)])
+                else:
+                    value_min = MCFG.axis_tbb[Band][0]
+                    value_max = MCFG.axis_tbb[Band][1]
+                print 'tbb', Band, value_min, value_max
+                regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band)
+
+
+def regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band):
+
+    # FY4分布
     MainPath, MainFile = os.path.split(ICFG.ofile)
     if not os.path.isdir(MainPath):
         os.makedirs(MainPath)
 
-    # 创建hdf5文件
-    h5File_W = h5py.File(ICFG.ofile, 'w')
+    meanbais = (np.mean(x - y) / np.mean(y)) * 100.
 
-    if DCLC.spec_MaskRough_value is not None:
-        dset = h5File_W.create_dataset('%sSpec_MaskRough_value' % NameHead2, dtype='f4', data=DCLC.spec_MaskRough_value, compression='gzip', compression_opts=5, shuffle=True)
-        h5File_W.create_dataset('%sSpec_MaskRough_row' % NameHead2, dtype='i2', data=DCLC.spec_MaskRough_row, compression='gzip', compression_opts=5, shuffle=True)
-        h5File_W.create_dataset('/%sSpec_MaskRough_col' % NameHead2, dtype='i2', data=DCLC.spec_MaskRough_col, compression='gzip', compression_opts=5, shuffle=True)
+    p = dv_plt.dv_scatter(figsize=(7, 5))
+    p.easyplot(x, y, None, None, marker='o', markersize=5)
 
-        dset.attrs.create('Long_name', 'Record spectral lines obtained from MaskRough dataset', shape=(1,), dtype='S64')
-    # 生成 h5,首先写入全局变量
-    # 第一颗传感器的全局数据信息
-    h5File_W.create_dataset('%sLon' % NameHead1, dtype='f4', data=DCLC.Lon1, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sLat' % NameHead1, dtype='f4', data=DCLC.Lat1, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sTime' % NameHead1, dtype='f4', data=DCLC.Time1, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sSatA' % NameHead1, dtype='f4', data=DCLC.SatA1, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sSatZ' % NameHead1, dtype='f4', data=DCLC.SatZ1, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sSoA' % NameHead1, dtype='f4', data=DCLC.SunA1, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sSoZ' % NameHead1, dtype='f4', data=DCLC.SunZ1, compression='gzip', compression_opts=5, shuffle=True)
+    p.xlim_min = p.ylim_min = value_min
+    p.xlim_max = p.ylim_max = value_max
 
-    if DCLC.LandCover1 is not None:
-        h5File_W.create_dataset('%sLandCover' % NameHead1, dtype='f4', data=DCLC.LandCover1, compression='gzip', compression_opts=5, shuffle=True)
-    if DCLC.LandSeaMask1 is not None:
-        h5File_W.create_dataset('%sLandSeaMask' % NameHead1, dtype='f4', data=DCLC.LandSeaMask1, compression='gzip', compression_opts=5, shuffle=True)
+    p.title = u'%s' % (ICFG.ymd)
+    p.xlabel = u'%s %s %s' % (ICFG.sat1, ICFG.sensor1, flag)
+    p.ylabel = u'%s %s %s' % (ICFG.sat2, ICFG.sensor2, flag)
+    # 计算AB
+    ab = np.polyfit(x, y, 1)
+    p.regression(ab[0], ab[1], 'b')
 
-    # 第二颗传感器的全局数据信息
-    h5File_W.create_dataset('%sLon' % NameHead2, dtype='f4', data=DCLC.Lon2, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sLat' % NameHead2, dtype='f4', data=DCLC.Lat2, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sTime' % NameHead2, dtype='f4', data=DCLC.Time2, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sSatA' % NameHead2, dtype='f4', data=DCLC.SatA2, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sSatZ' % NameHead2, dtype='f4', data=DCLC.SatZ2, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sSoA' % NameHead2, dtype='f4', data=DCLC.SunA2, compression='gzip', compression_opts=5, shuffle=True)
-    h5File_W.create_dataset('%sSoZ' % NameHead2, dtype='f4', data=DCLC.SunZ2, compression='gzip', compression_opts=5, shuffle=True)
+    # 计算相关性
+    p.show_leg = True
+    r = np.corrcoef(x, y)
+    rr = r[0][1] * r[0][1]
+    nums = len(x)
+    # 绘制散点
+    strlist = [[r'$%0.4fx%+0.4f (R=%0.4f) $' % (ab[0], ab[1], rr), r'count:%d' % nums, r'%sMeanBias: %0.4f' % (flag, meanbais)]]
+    p.annotate(strlist, 'left', 'r')
+    ofile = os.path.join(MainPath, '%s+%s_%s+%s_%s_%s_%s.png' % (ICFG.sat1, ICFG.sensor1, ICFG.sat2, ICFG.sensor2, ICFG.ymd, Band, flag))
+    p.savefig(ofile, dpi=300)
 
-    if DCLC.LandCover2 is not None:
-        h5File_W.create_dataset('%sLandCover' % NameHead2, dtype='f4', data=DCLC.LandCover2, compression='gzip', compression_opts=5, shuffle=True)
-    if DCLC.LandSeaMask2 is not None:
-        h5File_W.create_dataset('%sLandSeaMask' % NameHead2, dtype='f4', data=DCLC.LandSeaMask2, compression='gzip', compression_opts=5, shuffle=True)
 
-    # 写入掩码属性
-    dset = h5File_W.create_dataset('MaskRough', dtype='u2', data=DCLC.MaskRough, compression='gzip', compression_opts=5, shuffle=True)
-    dset.attrs.create('Long_name', 'after time and angle collocation', shape=(1,), dtype='S32')
-    # 写入公共区域属性
-    h5File_W.create_dataset('PubIdx', dtype='u2', data=DCLC.PubIdx, compression='gzip', compression_opts=5, shuffle=True)
-
-    # 写入1通道数据信息
-    for Band in MCFG.chan1:
-        ###################### 第一颗传感器通道数据 ########################
-
-        if DCLC.SV1[Band] is not None:
-            h5File_W.create_dataset('/%s/%sSV' % (Band, NameHead1), dtype='f4', data=DCLC.SV1[Band], compression='gzip', compression_opts=5, shuffle=True)
-        if DCLC.BB1[Band] is not None:
-            h5File_W.create_dataset('/%s/%sBB' % (Band, NameHead1), dtype='f4', data=DCLC.BB1[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        if DCLC.FovDnMean1[Band] is not None:
-            h5File_W.create_dataset('/%s/%sFovDnMean' % (Band, NameHead1), dtype='f4', data=DCLC.FovDnMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sFovDnStd' % (Band, NameHead1), dtype='f4', data=DCLC.FovDnStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvDnMean' % (Band, NameHead1), dtype='f4', data=DCLC.EnvDnMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvDnStd' % (Band, NameHead1), dtype='f4', data=DCLC.EnvDnStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        if DCLC.FovRefMean1[Band] is not None:
-            h5File_W.create_dataset('/%s/%sFovRefMean' % (Band, NameHead1), dtype='f4', data=DCLC.FovRefMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sFovRefStd' % (Band, NameHead1), dtype='f4', data=DCLC.FovRefStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvRefMean' % (Band, NameHead1), dtype='f4', data=DCLC.EnvRefMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvRefStd' % (Band, NameHead1), dtype='f4', data=DCLC.EnvRefStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        if DCLC.FovRadMean1[Band] is not None:
-            h5File_W.create_dataset('/%s/%sFovRadMean' % (Band, NameHead1), dtype='f4', data=DCLC.FovRadMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sFovRadStd' % (Band, NameHead1), dtype='f4', data=DCLC.FovRadStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvRadMean' % (Band, NameHead1), dtype='f4', data=DCLC.EnvRadMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvRadStd' % (Band, NameHead1), dtype='f4', data=DCLC.EnvRadStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        if DCLC.FovTbbMean1[Band] is not None:
-            h5File_W.create_dataset('/%s/%sFovTbbMean' % (Band, NameHead1), dtype='f4', data=DCLC.FovTbbMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sFovTbbStd' % (Band, NameHead1), dtype='f4', data=DCLC.FovTbbStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvTbbMean' % (Band, NameHead1), dtype='f4', data=DCLC.EnvTbbMean1[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvTbbStd' % (Band, NameHead1), dtype='f4', data=DCLC.EnvTbbStd1[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        ###################### 第二颗传感器通道数据 ########################
-        if DCLC.SV2[Band] is not None:
-            h5File_W.create_dataset('/%s/%sSV' % (Band, NameHead2), dtype='f4', data=DCLC.SV2[Band], compression='gzip', compression_opts=5, shuffle=True)
-        if DCLC.BB2[Band] is not None:
-            h5File_W.create_dataset('/%s/%sBB' % (Band, NameHead2), dtype='f4', data=DCLC.BB2[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        if DCLC.FovDnMean2[Band] is not None:
-            h5File_W.create_dataset('/%s/%sFovDnMean' % (Band, NameHead2), dtype='f4', data=DCLC.FovDnMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sFovDnStd' % (Band, NameHead2), dtype='f4', data=DCLC.FovDnStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvDnMean' % (Band, NameHead2), dtype='f4', data=DCLC.EnvDnMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvDnStd' % (Band, NameHead2), dtype='f4', data=DCLC.EnvDnStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        if DCLC.FovRefMean2[Band] is not None:
-            h5File_W.create_dataset('/%s/%sFovRefMean' % (Band, NameHead2), dtype='f4', data=DCLC.FovRefMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sFovRefStd' % (Band, NameHead2), dtype='f4', data=DCLC.FovRefStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvRefMean' % (Band, NameHead2), dtype='f4', data=DCLC.EnvRefMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvRefStd' % (Band, NameHead2), dtype='f4', data=DCLC.EnvRefStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        if DCLC.FovRadMean2[Band] is not None:
-            h5File_W.create_dataset('/%s/%sFovRadMean' % (Band, NameHead2), dtype='f4', data=DCLC.FovRadMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sFovRadStd' % (Band, NameHead2), dtype='f4', data=DCLC.FovRadStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvRadMean' % (Band, NameHead2), dtype='f4', data=DCLC.EnvRadMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvRadStd' % (Band, NameHead2), dtype='f4', data=DCLC.EnvRadStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        if DCLC.FovTbbMean2[Band] is not None:
-            h5File_W.create_dataset('/%s/%sFovTbbMean' % (Band, NameHead2), dtype='f4', data=DCLC.FovTbbMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sFovTbbStd' % (Band, NameHead2), dtype='f4', data=DCLC.FovTbbStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvTbbMean' % (Band, NameHead2), dtype='f4', data=DCLC.EnvTbbMean2[Band], compression='gzip', compression_opts=5, shuffle=True)
-            h5File_W.create_dataset('/%s/%sEnvTbbStd' % (Band, NameHead2), dtype='f4', data=DCLC.EnvTbbStd2[Band], compression='gzip', compression_opts=5, shuffle=True)
-
-        dset = h5File_W.create_dataset('/%s/MaskFine' % Band, dtype='u2', data=DCLC.MaskFine[Band], compression='gzip', compression_opts=5, shuffle=True)
-        dset.attrs.create('Long_name', 'after scene homogenous collocation', shape=(1,), dtype='S32')
-
-    h5File_W.close()
