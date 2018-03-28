@@ -628,7 +628,7 @@ class COLLOC_COMM():
         # 添加spec, 粗匹配后剩余的点是要记录光谱谱线的。。。2维转1维下标
         idx_1d = np.ravel_multi_index(idx1, (self.row, self.col))
 
-        if modeCfg.write_spec and not self.spec_MaskRough_value:
+        if modeCfg.write_spec and self.spec_MaskRough_value is None:
             # 定义spec_MaskRough_value 然后记录需要保存的谱线
             self.spec_MaskRough_value = []
             for i in idx_1d:
