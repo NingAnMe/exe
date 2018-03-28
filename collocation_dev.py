@@ -33,6 +33,7 @@ sys.setdefaultencoding('utf-8')
 # 配置文件信息，设置为全局
 MainPath, MainFile = os.path.split(os.path.realpath(__file__))
 
+
 class ReadYaml():
 
     def __init__(self, inFile):
@@ -60,6 +61,7 @@ class ReadYaml():
         self.col = cfg['PROJ']['col']
         self.row = cfg['PROJ']['row']
         self.res = cfg['PROJ']['res']
+
 
 def regression(x, y, min, max, flag, ICFG, MCFG, Band):
 
@@ -94,6 +96,7 @@ def regression(x, y, min, max, flag, ICFG, MCFG, Band):
     p.annotate(strlist, 'left', 'r')
     ofile = os.path.join(MainPath, '%s+%s_%s+%s_%s_%s_%s.png' % (ICFG.sat1, ICFG.sensor1, ICFG.sat2, ICFG.sensor2, ICFG.ymd, Band, flag))
     p.savefig(ofile, dpi=300)
+
 
 def draw_dclc(DCLC, ICFG, MCFG):
 
@@ -219,10 +222,12 @@ def main(inYamlFile):
                 ##########07 粗匹配 ##########
                 DCLC.save_rough_data(P1, P2, D1, D2, MCFG)
         T2 = datetime.now()
-        print 'read:', (T2 - T1).total_seconds()
+        print 'rough:', (T2 - T1).total_seconds()
     else:
-        DCLC.remask_load(ICFG, MCFG)
-
+        T1 = datetime.now()
+        DCLC.reload_data(ICFG, MCFG)
+        T2 = datetime.now()
+        print 'reload:', (T2 - T1).total_seconds()
     ##########08 精匹配 ##########
     T1 = datetime.now()
     DCLC.save_fine_data(MCFG)
@@ -230,7 +235,12 @@ def main(inYamlFile):
     print 'colloc:', (T2 - T1).total_seconds()
 
     ##########09 输出匹配结果 ##########
-    if MCFG.rewrite:
+    if remask:
+        T1 = datetime.now()
+        DCLC.rewrite_data(DCLC, ICFG, MCFG)
+        T2 = datetime.now()
+        print 'rewrite:', (T2 - T1).total_seconds()
+    elif MCFG.rewrite:
         T1 = datetime.now()
         write_dclc(DCLC, ICFG, MCFG)
         T2 = datetime.now()
