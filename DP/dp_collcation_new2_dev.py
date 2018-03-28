@@ -826,7 +826,14 @@ class COLLOC_COMM():
         :param MCFG: 阈值配置文件
         :return:
         """
-        pass
+        i_file = ICFG.ofile
+        with h5py.File(i_file, 'r+') as hdf5File:
+            dset = hdf5File.get('MaskRough')
+            dset[...] = self.MaskRough
+
+            for band in MCFG.chan1:
+                dset = hdf5File.get('%s/MaskFine' % band)
+                dset[...] = self.MaskFine.get('%s' % band)
 
 
 def write_dclc(DCLC, ICFG, MCFG):
