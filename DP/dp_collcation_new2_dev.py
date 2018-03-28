@@ -198,7 +198,7 @@ class COLLOC_COMM():
             self.SV2[band] = np.full((row, col), self.FillValue, self.dtype)
             self.BB2[band] = np.full((row, col), self.FillValue, self.dtype)
 
-    def remask_load(self, ICFG, MCFG):
+    def reload_data(self, ICFG, MCFG):
         """
         :param modeCfg: 配置文件
         :return:
