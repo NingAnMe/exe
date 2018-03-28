@@ -211,7 +211,7 @@ class COLLOC_COMM():
             if 'MaskRough' in global_keys:
                 self.MaskRough = hdf5File.get('MaskRough')[:]
             if 'PubIdx' in global_keys:
-                self.MaskRough = hdf5File.get('PubIdx')[:]
+                self.PubIdx = hdf5File.get('PubIdx')[:]
 
             if 'S1_Time' in global_keys:
                 self.Time1 = hdf5File.get('S1_Time')[:]
