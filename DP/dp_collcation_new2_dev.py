@@ -206,10 +206,12 @@ class COLLOC_COMM():
         :return:
         """
         i_file = ICFG.ofile
+        row = ICFG.row
+        col = ICFG.col
         with h5py.File(i_file, 'r') as hdf5File:
             global_keys = hdf5File.keys()
             if 'MaskRough' in global_keys:
-                self.MaskRough = hdf5File.get('MaskRough')[:]
+                self.MaskRough = np.full((row, col), 0, 'i1')
             if 'PubIdx' in global_keys:
                 self.PubIdx = hdf5File.get('PubIdx')[:]
 
@@ -266,7 +268,7 @@ class COLLOC_COMM():
             for band in MCFG.chan1:
                 band_keys = hdf5File.get(band).keys()
                 if 'MaskFine' in band_keys:
-                    self.MaskFine[band] = hdf5File.get(band)['MaskFine'][:]
+                    self.MaskFine[band] = np.full((row, col), 0, 'i1')
 
                 if 'S1_FovDnMean' in band_keys:
                     self.FovDnMean1[band] = hdf5File.get(band)['S1_FovDnMean'][:]
