@@ -37,9 +37,9 @@ MainPath, MainFile = os.path.split(os.path.realpath(__file__))
 class ReadYaml():
 
     def __init__(self, inFile):
-        '''
+        """
         读取yaml格式配置文件
-        '''
+        """
         if not os.path.isfile(inFile):
             print 'Not Found %s' % inFile
             sys.exit(-1)
@@ -164,8 +164,8 @@ def main(inYamlFile):
     MCFG = ReadModeYaml(modeFile)
     DCLC = COLLOC_COMM(ICFG.row, ICFG.col, MCFG.chan1)  # DCLC = DATA DCLC 匹配结果类
 
-    remask = True
-    if not remask:
+    rewrite_mask = True
+    if not rewrite_mask:
         ##########03 解析 第一颗传感器的L1数据 ##########
         for inFile in ICFG.ifile1:
             if 'MERSI' == ICFG.sensor1:
@@ -235,9 +235,9 @@ def main(inYamlFile):
     print 'colloc:', (T2 - T1).total_seconds()
 
     ##########09 输出匹配结果 ##########
-    if remask:
+    if rewrite_mask:
         T1 = datetime.now()
-        DCLC.rewrite_data(DCLC, ICFG, MCFG)
+        DCLC.rewrite_data(ICFG, MCFG)
         T2 = datetime.now()
         print 'rewrite:', (T2 - T1).total_seconds()
     elif MCFG.rewrite:
