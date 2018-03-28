@@ -65,7 +65,8 @@ class ReadModeYaml():
             for threshold in cfg[ch]:
                 self.CH_threshold[ch][threshold] = cfg[ch][threshold]
 
-class COLLOC_COMM():
+
+class COLLOC_COMM(object):
     """
     交叉匹配的公共类，首先初始化所有参数信息
     """
@@ -348,7 +349,7 @@ class COLLOC_COMM():
         """
         print u'对公共区域位置进行数据赋值......'
         # 公共的投影区域位置信息
-        condition = np.logical_and(P1.lut_i > 0 , P2.lut_i > 0)
+        condition = np.logical_and(P1.lut_i > 0, P2.lut_i > 0)
         idx = np.where(condition)
         # 记录粗匹配点
         self.PubIdx[idx] = 1
@@ -418,10 +419,10 @@ class COLLOC_COMM():
                 # sat1 Fov和Env dn的mean和std
                 data = D1.DN['%s' % Band1]
                 # 计算各个通道的投影后数据位置对应原始数据位置点的指定范围的均值和std
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind1, i1, j1, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind1, i1, j1, p_i, p_j)
                 self.FovDnMean1[Band1][pi, pj] = mean
                 self.FovDnStd1[Band1][pi, pj] = std
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind1, i1, j1, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind1, i1, j1, p_i, p_j)
                 self.EnvDnMean1[Band1][pi, pj] = mean
                 self.EnvDnStd1[Band1][pi, pj] = std
             else:
@@ -434,10 +435,10 @@ class COLLOC_COMM():
             if Band1 in D1.Ref.keys():
                 # sat1 Fov和Env Ref的mean和std
                 data = D1.Ref['%s' % Band1]
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind1, i1, j1, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind1, i1, j1, p_i, p_j)
                 self.FovRefMean1[Band1][pi, pj] = mean
                 self.FovRefStd1[Band1][pi, pj] = std
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind1, i1, j1, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind1, i1, j1, p_i, p_j)
                 self.EnvRefMean1[Band1][pi, pj] = mean
                 self.EnvRefStd1[Band1][pi, pj] = std
             else:
@@ -453,7 +454,7 @@ class COLLOC_COMM():
                 mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind1, i1, j1, p_i, p_j)
                 self.FovRadMean1[Band1][pi, pj] = mean
                 self.FovRadStd1[Band1][pi, pj] = std
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind1, i1, j1, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind1, i1, j1, p_i, p_j)
                 self.EnvRadMean1[Band1][pi, pj] = mean
                 self.EnvRadStd1[Band1][pi, pj] = std
             else:
@@ -466,10 +467,10 @@ class COLLOC_COMM():
             if Band1 in D1.Tbb.keys():
                 # sat1 Fov和Env Ref的mean和std
                 data = D1.Tbb['%s' % Band1]
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind1, i1, j1, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind1, i1, j1, p_i, p_j)
                 self.FovTbbMean1[Band1][pi, pj] = mean
                 self.FovTbbStd1[Band1][pi, pj] = std
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind1, i1, j1, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind1, i1, j1, p_i, p_j)
                 self.EnvTbbMean1[Band1][pi, pj] = mean
                 self.EnvTbbStd1[Band1][pi, pj] = std
             else:
@@ -494,10 +495,10 @@ class COLLOC_COMM():
             if Band2 in D2.DN.keys():
                 # sat1 Fov和Env dn的mean和std
                 data = D2.DN['%s' % Band2]
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind2, i2, j2, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind2, i2, j2, p_i, p_j)
                 self.FovDnMean2[Band1][pi, pj] = mean
                 self.FovDnStd2[Band1][pi, pj] = std
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind2, i2, j2, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind2, i2, j2, p_i, p_j)
                 self.EnvDnMean2[Band1][pi, pj] = mean
                 self.EnvDnStd2[Band1][pi, pj] = std
             else:
@@ -511,10 +512,10 @@ class COLLOC_COMM():
             if Band2 in D2.Ref.keys():
                 # sat1 Fov和Env Ref的mean和std
                 data = D2.Ref['%s' % Band2]
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind2, i2, j2, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind2, i2, j2, p_i, p_j)
                 self.FovRefMean2[Band1][pi, pj] = mean
                 self.FovRefStd2[Band1][pi, pj] = std
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind2, i2, j2, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind2, i2, j2, p_i, p_j)
                 self.EnvRefMean2[Band1][pi, pj] = mean
                 self.EnvRefStd2[Band1][pi, pj] = std
             else:
@@ -527,10 +528,10 @@ class COLLOC_COMM():
             if Band2 in D2.Rad.keys():
                 # sat1 Fov和Env Ref的mean和std
                 data = D2.Rad['%s' % Band2]
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind2, i2, j2, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind2, i2, j2, p_i, p_j)
                 self.FovRadMean2[Band1][pi, pj] = mean
                 self.FovRadStd2[Band1][pi, pj] = std
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind2, i2, j2, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind2, i2, j2, p_i, p_j)
                 self.EnvRadMean2[Band1][pi, pj] = mean
                 self.EnvRadStd2[Band1][pi, pj] = std
             else:
@@ -543,10 +544,10 @@ class COLLOC_COMM():
             if Band2 in D2.Tbb.keys():
                 # sat1 Fov和Env Ref的mean和std
                 data = D2.Tbb['%s' % Band2]
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind2, i2, j2, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind2, i2, j2, p_i, p_j)
                 self.FovTbbMean2[Band1][pi, pj] = mean
                 self.FovTbbStd2[Band1][pi, pj] = std
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind2, i2, j2, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind2, i2, j2, p_i, p_j)
                 self.EnvTbbMean2[Band1][pi, pj] = mean
                 self.EnvTbbStd2[Band1][pi, pj] = std
             else:
@@ -587,15 +588,14 @@ class COLLOC_COMM():
         idx1 = np.where(idx_Rough)
         print u'1. 距离过滤后剩余点 ', len(idx1[0])
 
-
         timeDiff = np.abs(self.Time1 - self.Time2)
 
         idx_Rough = np.logical_and(idx_Rough, timeDiff <= modeCfg.timedif_max)
         idx1 = np.where(idx_Rough)
         print u'2. 时间过滤后剩余点 ', len(idx1[0])
         ############### 过滤太阳天顶角 ###############
-        idx_Rough = np.logical_and(idx_Rough , self.SunZ1 <= modeCfg.solzenith_max)
-        idx_Rough = np.logical_and(idx_Rough , self.SunZ2 <= modeCfg.solzenith_max)
+        idx_Rough = np.logical_and(idx_Rough, self.SunZ1 <= modeCfg.solzenith_max)
+        idx_Rough = np.logical_and(idx_Rough, self.SunZ2 <= modeCfg.solzenith_max)
         idx1 = np.where(idx_Rough)
         print u'3. 太阳天顶角过滤后剩余点 ', len(idx1[0])
 
@@ -765,7 +765,6 @@ class COLLOC_COMM():
                 idx = np.where(condition)
                 print u'%s %s 云判识开启,晴空点中 饱和值1 均匀过滤后, 精匹配点个数 %d' % (Band1, flag, len(idx[0]))
 
-
                 condition = np.logical_and(homoFov2 < th2, condition)
                 idx = np.where(condition)
                 print u'%s %s 云判识开启,晴空点中 靶区2 均匀过滤后, 精匹配点个数 %d' % (Band1, flag, len(idx[0]))
@@ -787,7 +786,6 @@ class COLLOC_COMM():
                 if 'ir' in flag:
                     condition = np.logical_and(self.MaskRough > 0, irValue < modeCfg.clear_min_ir)
                     condition = np.logical_and(irValue > 0, condition)
-                    idx = np.where(condition)
                 elif 'vis' in flag:
                     condition = np.logical_and(self.MaskRough > 0, visValue >= modeCfg.clear_max_vis)
 
@@ -812,7 +810,6 @@ class COLLOC_COMM():
                 idx = np.where(condition)
                 print u'%s %s 云判识开启,云区点中 饱和值1 均匀过滤后, 精匹配点个数 %d' % (Band1, flag, len(idx[0]))
 
-
                 condition = np.logical_and(homoFov2 < th_cld2, condition)
                 idx = np.where(condition)
                 print u'%s %s 云判识开启,云区点中 靶区2 均匀过滤后, 精匹配点个数 %d' % (Band1, flag, len(idx[0]))
@@ -827,7 +824,6 @@ class COLLOC_COMM():
 
                 idx = np.where(condition)
                 print u'%s %s 云判识开启,云区点中 饱和值1 均匀过滤后, 精匹配点个数 %d' % (Band1, flag, len(idx[0]))
-
 
                 idx_cloud = np.where(condition)
                 totalNums = len(idx_cloud[0]) + len(idx_clear[0])
@@ -856,7 +852,7 @@ def write_dclc(DCLC, ICFG, MCFG):
     for band in MCFG.chan1:
         idx = np.where(DCLC.MaskFine[band] > 0)
         DCLC_nums = len(idx[0])
-        if (DCLC_nums > 0):
+        if DCLC_nums > 0:
             break
     if DCLC_nums == 0:
         print('colloc point is zero')
@@ -874,9 +870,9 @@ def write_dclc(DCLC, ICFG, MCFG):
     h5File_W = h5py.File(ICFG.ofile, 'w')
 
     if DCLC.spec_MaskRough_value is not None:
-        dset = h5File_W.create_dataset('%sSpec_MaskRough_value' % (NameHead2), dtype='f4', data=DCLC.spec_MaskRough_value, compression='gzip', compression_opts=5, shuffle=True)
-        h5File_W.create_dataset('%sSpec_MaskRough_row' % (NameHead2), dtype='i2', data=DCLC.spec_MaskRough_row, compression='gzip', compression_opts=5, shuffle=True)
-        h5File_W.create_dataset('/%sSpec_MaskRough_col' % (NameHead2), dtype='i2', data=DCLC.spec_MaskRough_col, compression='gzip', compression_opts=5, shuffle=True)
+        dset = h5File_W.create_dataset('%sSpec_MaskRough_value' % NameHead2, dtype='f4', data=DCLC.spec_MaskRough_value, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('%sSpec_MaskRough_row' % NameHead2, dtype='i2', data=DCLC.spec_MaskRough_row, compression='gzip', compression_opts=5, shuffle=True)
+        h5File_W.create_dataset('/%sSpec_MaskRough_col' % NameHead2, dtype='i2', data=DCLC.spec_MaskRough_col, compression='gzip', compression_opts=5, shuffle=True)
 
         dset.attrs.create('Long_name', 'Record spectral lines obtained from MaskRough dataset', shape=(1,), dtype='S64')
     # 生成 h5,首先写入全局变量
