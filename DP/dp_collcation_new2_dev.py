@@ -898,6 +898,8 @@ def write_dclc(DCLC, ICFG, MCFG):
     # 写入掩码属性
     dset = h5File_W.create_dataset('MaskRough', dtype='u2', data=DCLC.MaskRough, compression='gzip', compression_opts=5, shuffle=True)
     dset.attrs.create('Long_name', 'after time and angle collocation', shape=(1,), dtype='S32')
+    # 写入公共区域属性
+    h5File_W.create_dataset('PubIdx' % Band, dtype='u2', data=DCLC.PubIdx, compression='gzip', compression_opts=5, shuffle=True)
 
     # 写入1通道数据信息
     for Band in MCFG.chan1:
@@ -964,7 +966,5 @@ def write_dclc(DCLC, ICFG, MCFG):
 
         dset = h5File_W.create_dataset('/%s/MaskFine' % Band, dtype='u2', data=DCLC.MaskFine[Band], compression='gzip', compression_opts=5, shuffle=True)
         dset.attrs.create('Long_name', 'after scene homogenous collocation', shape=(1,), dtype='S32')
-
-        h5File_W.create_dataset('/%s/PubIdx' % Band, dtype='u2', data=DCLC.PubIdx, compression='gzip', compression_opts=5, shuffle=True)
 
     h5File_W.close()
