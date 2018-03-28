@@ -210,6 +210,8 @@ class COLLOC_COMM():
             global_keys = hdf5File.keys()
             if 'MaskRough' in global_keys:
                 self.MaskRough = hdf5File.get('MaskRough')[:]
+            if 'PubIdx' in global_keys:
+                self.MaskRough = hdf5File.get('PubIdx')[:]
 
             if 'S1_Time' in global_keys:
                 self.Time1 = hdf5File.get('S1_Time')[:]
@@ -540,7 +542,6 @@ class COLLOC_COMM():
                 self.EnvTbbMean2[Band1] = None
                 self.EnvTbbStd2[Band1] = None
 
-
             # sat1 sv和 bb的赋值
             if D2.SV[Band2] is not None:
                 self.SV2[Band1][p_i, p_j] = D2.SV[Band2][i2, j2]
@@ -559,7 +560,7 @@ class COLLOC_COMM():
 
         # 最终的公共匹配点数量
         idx = np.where(self.PubIdx > 0)
-        if  len(idx[0]) == 0:
+        if len(idx[0]) == 0:
             return
         print u'所有粗匹配点数目 ', len(idx[0])
 
@@ -963,4 +964,7 @@ def write_dclc(DCLC, ICFG, MCFG):
 
         dset = h5File_W.create_dataset('/%s/MaskFine' % Band, dtype='u2', data=DCLC.MaskFine[Band], compression='gzip', compression_opts=5, shuffle=True)
         dset.attrs.create('Long_name', 'after scene homogenous collocation', shape=(1,), dtype='S32')
+
+        h5File_W.create_dataset('/%s/PubIdx' % Band, dtype='u2', data=DCLC.PubIdx, compression='gzip', compression_opts=5, shuffle=True)
+
     h5File_W.close()
