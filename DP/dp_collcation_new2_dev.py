@@ -8,10 +8,11 @@ import numpy as np
 from dp_2d import rolling_2d_window_pro
 from PB.pb_space import sun_glint_cal
 
+
 class ReadModeYaml():
-    '''
+    """
         读取yaml格式配置文件,解析匹配的传感器对的默认配置参数
-    '''
+    """
 
     def __init__(self, inFile):
 
@@ -65,9 +66,9 @@ class ReadModeYaml():
                 self.CH_threshold[ch][threshold] = cfg[ch][threshold]
 
 class COLLOC_COMM():
-    '''
+    """
     交叉匹配的公共类，首先初始化所有参数信息
-    '''
+    """
     def __init__(self, row, col, BandLst):
 
         # 默认填充值 和 数据类型
@@ -200,7 +201,8 @@ class COLLOC_COMM():
 
     def reload_data(self, ICFG, MCFG):
         """
-        :param modeCfg: 配置文件
+        :param ICFG: 输入配置文件
+        :param MCFG: 阈值配置文件
         :return:
         """
         i_file = ICFG.ofile
@@ -325,9 +327,9 @@ class COLLOC_COMM():
                     self.BB2[band] = hdf5File.get(band)['S2_BB'][:]
 
     def save_rough_data(self, P1, P2, D1, D2, modeCfg):
-        '''
+        """
         第一轮匹配，根据查找表进行数据的mean和std计算，并且对全局物理量复制（角度，经纬度，时间等）
-        '''
+        """
         print u'对公共区域位置进行数据赋值......'
         # 公共的投影区域位置信息
         condition = np.logical_and(P1.lut_i > 0 , P2.lut_i > 0)
@@ -817,6 +819,14 @@ class COLLOC_COMM():
                 totalNums = len(idx_cloud[0]) + len(idx_clear[0])
                 print u'%s %s 云判识开启，匹配点个数，晴空 %d 云区 %d 总计：%d' % (Band1, flag, len(idx_clear[0]), len(idx_cloud[0]), totalNums)
                 self.MaskFine[Band1][idx_cloud] = 1
+
+    def rewrite_data(self, ICFG, MCFG):
+        """
+        :param ICFG: 输入配置文件
+        :param MCFG: 阈值配置文件
+        :return:
+        """
+        pass
 
 
 def write_dclc(DCLC, ICFG, MCFG):
