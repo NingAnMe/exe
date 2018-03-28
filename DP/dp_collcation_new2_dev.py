@@ -354,13 +354,12 @@ class COLLOC_COMM():
         self.PubIdx[idx] = 1
         print u'FY LEO 公共区域匹配点个数 %d' % len(idx[0])
         # 粗匹配点没有则返回
-        if  len(idx[0]) == 0:
+        if len(idx[0]) == 0:
             return
 
         # 投影后网格，公共区域的投影后数据的行列
         p_i = idx[0]
         p_j = idx[1]
-
 
         # 投影后网格，公共区域的投影后 传感器1 和 传感器2 数据的行列
         i1 = P1.lut_i[idx]
@@ -451,7 +450,7 @@ class COLLOC_COMM():
             if Band1 in D1.Rad.keys():
                 # sat1 Fov和Env Ref的mean和std
                 data = D1.Rad['%s' % Band1]
-                mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind1, i1, j1, p_i, p_j)
+                mean, std, pi, pj = rolling_2d_window_pro(data, modeCfg.FovWind1, i1, j1, p_i, p_j)
                 self.FovRadMean1[Band1][pi, pj] = mean
                 self.FovRadStd1[Band1][pi, pj] = std
                 mean, std , pi, pj = rolling_2d_window_pro(data, modeCfg.EnvWind1, i1, j1, p_i, p_j)
@@ -568,9 +567,9 @@ class COLLOC_COMM():
                 self.BB2[Band1] = None
 
     def save_fine_data(self, modeCfg):
-        '''
+        """
         第二轮匹配，根据各通道的的mean和std计以为，角度和距离等进行精细化过滤
-        '''
+        """
 
         # 最终的公共匹配点数量
         idx = np.where(self.PubIdx > 0)
@@ -603,10 +602,10 @@ class COLLOC_COMM():
         ############### 计算耀斑角 ###############
         glint1 = np.full_like(self.SatZ1, -999.)
         glint2 = np.full_like(self.SatZ1, -999.)
-        print 'self.SatA1[idx]=' , np.nanmin(self.SatA1[idx]), np.nanmax(self.SatA1[idx])
-        print 'self.SatZ1[idx]=' , np.nanmin(self.SatZ1[idx]), np.nanmax(self.SatZ1[idx])
-        print 'self.SunA1[idx]=' , np.min(self.SunA1[idx]), np.max(self.SunA1[idx])
-        print 'self.SunZ1[idx]=' , np.min(self.SunZ1[idx]), np.max(self.SunZ1[idx])
+        print 'self.SatA1[idx]=', np.nanmin(self.SatA1[idx]), np.nanmax(self.SatA1[idx])
+        print 'self.SatZ1[idx]=', np.nanmin(self.SatZ1[idx]), np.nanmax(self.SatZ1[idx])
+        print 'self.SunA1[idx]=', np.min(self.SunA1[idx]), np.max(self.SunA1[idx])
+        print 'self.SunZ1[idx]=', np.min(self.SunZ1[idx]), np.max(self.SunZ1[idx])
 
         glint1[idx] = sun_glint_cal(self.SatA1[idx], self.SatZ1[idx], self.SunA1[idx], self.SunZ1[idx])
         glint2[idx] = sun_glint_cal(self.SatA2[idx], self.SatZ2[idx], self.SunA2[idx], self.SunZ2[idx])
