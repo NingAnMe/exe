@@ -164,6 +164,9 @@ def main(inYamlFile):
     MCFG = ReadModeYaml(modeFile)
     DCLC = COLLOC_COMM(ICFG.row, ICFG.col, MCFG.chan1)  # DCLC = DATA DCLC 匹配结果类
 
+    T2 = datetime.now()
+    print 'read config:', (T2 - T1).total_seconds()
+
     # 判断是否重写
     if os.path.isfile(ICFG.ofile):
         rewrite_mask = True
@@ -171,6 +174,7 @@ def main(inYamlFile):
         rewrite_mask = False
 
     if not rewrite_mask:
+        T1 = datetime.now()
         ##########03 解析 第一颗传感器的L1数据 ##########
         for inFile in ICFG.ifile1:
             if 'MERSI' == ICFG.sensor1:
