@@ -231,6 +231,12 @@ class COLLOC_COMM():
                 self.LandCover1 = hdf5File.get('S1_LandCover')[:]
             if 'S1_LandSeaMask' in global_keys:
                 self.LandSeaMask1 = hdf5File.get('S1_LandSeaMask')[:]
+            if 'S1_Spec_MaskRough_col' in global_keys:
+                self.spec_MaskRough_col = hdf5File.get('S1_Spec_MaskRough_col')[:]
+            if 'S1_Spec_MaskRough_row' in global_keys:
+                self.spec_MaskRough_row = hdf5File.get('S1_Spec_MaskRough_row')[:]
+            if 'S1_Spec_MaskRough_value' in global_keys:
+                self.spec_MaskRough_value = hdf5File.get('S1_Spec_MaskRough_value')[:]
 
             if 'S2_Time' in global_keys:
                 self.Time2 = hdf5File.get('S2_Time')[:]
@@ -250,6 +256,12 @@ class COLLOC_COMM():
                 self.LandCover2 = hdf5File.get('S2_LandCover')[:]
             if 'S2_LandSeaMask' in global_keys:
                 self.LandSeaMask2 = hdf5File.get('S2_LandSeaMask')[:]
+            if 'S2_Spec_MaskRough_col' in global_keys:
+                self.spec_MaskRough_col = hdf5File.get('S2_Spec_MaskRough_col')[:]
+            if 'S2_Spec_MaskRough_row' in global_keys:
+                self.spec_MaskRough_row = hdf5File.get('S2_Spec_MaskRough_row')[:]
+            if 'S2_Spec_MaskRough_value' in global_keys:
+                self.spec_MaskRough_value = hdf5File.get('S2_Spec_MaskRough_value')[:]
 
             for band in MCFG.chan1:
                 band_keys = hdf5File.get(band).keys()
@@ -616,7 +628,7 @@ class COLLOC_COMM():
         # 添加spec, 粗匹配后剩余的点是要记录光谱谱线的。。。2维转1维下标
         idx_1d = np.ravel_multi_index(idx1, (self.row, self.col))
 
-        if modeCfg.write_spec:
+        if modeCfg.write_spec and not self.spec_MaskRough_value:
             # 定义spec_MaskRough_value 然后记录需要保存的谱线
             self.spec_MaskRough_value = []
             for i in idx_1d:
