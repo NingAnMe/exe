@@ -986,49 +986,56 @@ class COLLOC_COMM(object):
             if self.FovRefMean1[Band] is not None:
                 x = self.FovRefMean1[Band][idx]
                 y = self.FovRefMean2[Band][idx]
-                if len(x) < 2:
-                    continue
-                flag = 'Ref'
-                if MCFG.AutoRange:
-                    value_min = np.min([np.min(x), np.min(y)])
-                    value_max = np.max([np.max(x), np.max(y)])
-                else:
-                    value_min = MCFG.axis_ref[Band][0]
-                    value_max = MCFG.axis_ref[Band][1]
-
-                regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band)
+                if len(x) >= 2:
+                    value_min = value_max = None
+                    flag = 'Ref'
+                    print('ref', Band, np.min(x), np.max(x),
+                          np.min(y), np.max(y))
+                    if MCFG.AutoRange:
+                        value_min = np.min([np.min(x), np.min(y)])
+                        value_max = np.max([np.max(x), np.max(y)])
+                    elif len(MCFG.axis_ref) != 0:
+                        value_min = MCFG.axis_ref[Band][0]
+                        value_max = MCFG.axis_ref[Band][1]
+                    if value_min and value_max:
+                        regression(x, y, value_min, value_max,
+                                   flag, ICFG, MCFG, Band)
 
             if self.FovRadMean1[Band] is not None:
                 x = self.FovRadMean1[Band][idx]
                 y = self.FovRadMean2[Band][idx]
-                if len(x) < 2:
-                    continue
-                flag = 'Rad'
-                print 'rad', Band, np.min(x), np.max(x), np.min(y), np.max(y)
-                if MCFG.AutoRange:
-                    value_min = np.min([np.min(x), np.min(y)])
-                    value_max = np.max([np.max(x), np.max(y)])
-                else:
-                    value_min = MCFG.axis_rad[Band][0]
-                    value_max = MCFG.axis_rad[Band][1]
-
-                regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band)
+                if len(x) >= 2:
+                    value_min = value_max = None
+                    flag = 'Rad'
+                    print('rad', Band, np.min(x), np.max(x),
+                          np.min(y), np.max(y))
+                    if MCFG.AutoRange:
+                        value_min = np.min([np.min(x), np.min(y)])
+                        value_max = np.max([np.max(x), np.max(y)])
+                    elif len(MCFG.axis_rad) != 0:
+                        value_min = MCFG.axis_rad[Band][0]
+                        value_max = MCFG.axis_rad[Band][1]
+                    if value_min and value_max:
+                        regression(x, y, value_min, value_max,
+                                   flag, ICFG, MCFG, Band)
 
             if self.FovTbbMean1[Band] is not None:
                 x = self.FovTbbMean1[Band][idx]
                 y = self.FovTbbMean2[Band][idx]
-                if len(x) < 2:
-                    continue
-                flag = 'Tbb'
-                print 'tbb', Band, np.min(x), np.max(x), np.min(y), np.max(y)
-                if MCFG.AutoRange:
-                    value_min = np.min([np.min(x), np.min(y)])
-                    value_max = np.max([np.max(x), np.max(y)])
-                else:
-                    value_min = MCFG.axis_tbb[Band][0]
-                    value_max = MCFG.axis_tbb[Band][1]
-                print 'tbb', Band, value_min, value_max
-                regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band)
+                if len(x) >= 2:
+                    value_min = value_max = None
+                    flag = 'Tbb'
+                    print('tbb', Band, np.min(x),
+                          np.max(x), np.min(y), np.max(y))
+                    if MCFG.AutoRange:
+                        value_min = np.min([np.min(x), np.min(y)])
+                        value_max = np.max([np.max(x), np.max(y)])
+                    elif len(MCFG.axis_tbb) != 0:
+                        value_min = MCFG.axis_tbb[Band][0]
+                        value_max = MCFG.axis_tbb[Band][1]
+                    if value_min and value_max:
+                        regression(x, y, value_min, value_max,
+                                   flag, ICFG, MCFG, Band)
 
 
 def regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band):
