@@ -25,7 +25,7 @@ from PB.DRC.pb_drc_cris_L1 import CLASS_CRIS_L1
 from PB.DRC.pb_drc_hmw8_new import CLASS_HMW8_L1
 from DP.dp_collcation_new2_dev import *
 from DP.dp_prj_new import prj_core
-from DV import dv_map, dv_plt, dv_img
+
 
 # 文件默认编码修改位utf-8
 reload(sys)
