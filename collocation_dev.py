@@ -70,7 +70,7 @@ def main(inYamlFile):
     ICFG = ReadYaml(inYamlFile)
 
     ##########02 MCFG = 阈值配置文件类
-    modeFile = os.path.join(MainPath, 'COLLOC_%s_%s.yaml' % (ICFG.sensor1, ICFG.sensor2))
+    modeFile = os.path.join(MainPath, 'COLLOC_%s_%s_dev.yaml' % (ICFG.sensor1, ICFG.sensor2))
     MCFG = ReadModeYaml(modeFile)
     DCLC = COLLOC_COMM(ICFG.row, ICFG.col, MCFG.chan1)  # DCLC = DATA DCLC 匹配结果类
 
