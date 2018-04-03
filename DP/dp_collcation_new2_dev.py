@@ -984,9 +984,11 @@ class COLLOC_COMM(object):
 
         for Band in MCFG.chan1:
             idx = np.where(self.MaskFine[Band] > 0)
-            if self.FovRefMean1[Band] is not None:
+            if self.FovRefMean1[Band] is not None and Band in MCFG.axis_ref:
+                print('enter plot ref')
                 x = self.FovRefMean1[Band][idx]
                 y = self.FovRefMean2[Band][idx]
+                print(len(y))
                 if len(x) >= 2:
                     value_min = value_max = None
                     flag = 'Ref'
@@ -999,10 +1001,12 @@ class COLLOC_COMM(object):
                         value_min = MCFG.axis_ref[Band][0]
                         value_max = MCFG.axis_ref[Band][1]
                     if value_min and value_max:
+                        print('enter plot ref 1')
                         regression(x, y, value_min, value_max,
                                    flag, ICFG, MCFG, Band)
+                        print('enter plot ref 2')
 
-            if self.FovRadMean1[Band] is not None:
+            if self.FovRadMean1[Band] is not None and Band in MCFG.axis_rad:
                 x = self.FovRadMean1[Band][idx]
                 y = self.FovRadMean2[Band][idx]
                 if len(x) >= 2:
@@ -1020,7 +1024,7 @@ class COLLOC_COMM(object):
                         regression(x, y, value_min, value_max,
                                    flag, ICFG, MCFG, Band)
 
-            if self.FovTbbMean1[Band] is not None:
+            if self.FovTbbMean1[Band] is not None and Band in MCFG.axis_rad:
                 x = self.FovTbbMean1[Band][idx]
                 y = self.FovTbbMean2[Band][idx]
                 if len(x) >= 2:
