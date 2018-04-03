@@ -67,6 +67,62 @@ class ReadModeYaml():
                 self.CH_threshold[ch][threshold] = cfg[ch][threshold]
 
 
+def _get_band_dataset(set_name, hdf5_file, band=None):
+    """
+    获取某个通道对应名字的数据集，如果没有，赋值为 None
+    :param band: 通道名
+    :param set_name: 数据集名
+    :param hdf5: hdf5 文件
+    :return:
+    """
+    if band is None:
+        keys = hdf5_file.keys()
+        if set_name in keys:
+            return hdf5_file.get(set_name)[:]
+        else:
+            return None
+    else:
+        keys = hdf5_file.get(band).keys()
+        if set_name in keys:
+            return hdf5_file.get(band)[set_name][:]
+        else:
+            return None
+
+
+def regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band):
+
+    # FY4分布
+    MainPath, MainFile = os.path.split(ICFG.ofile)
+    if not os.path.isdir(MainPath):
+        os.makedirs(MainPath)
+
+    meanbais = (np.mean(x - y) / np.mean(y)) * 100.
+
+    p = dv_plt.dv_scatter(figsize=(7, 5))
+    p.easyplot(x, y, None, None, marker='o', markersize=5)
+
+    p.xlim_min = p.ylim_min = value_min
+    p.xlim_max = p.ylim_max = value_max
+
+    p.title = u'%s' % (ICFG.ymd)
+    p.xlabel = u'%s %s %s' % (ICFG.sat1, ICFG.sensor1, flag)
+    p.ylabel = u'%s %s %s' % (ICFG.sat2, ICFG.sensor2, flag)
+    # 计算AB
+    ab = np.polyfit(x, y, 1)
+    p.regression(ab[0], ab[1], 'b')
+
+    # 计算相关性
+    p.show_leg = True
+    r = np.corrcoef(x, y)
+    rr = r[0][1] * r[0][1]
+    nums = len(x)
+    # 绘制散点
+    strlist = [[r'$%0.4fx%+0.4f (R=%0.4f) $' % (ab[0], ab[1], rr), r'count:%d' % nums, r'%sMeanBias: %0.4f' % (flag, meanbais)]]
+    p.annotate(strlist, 'left', 'r')
+    ofile = os.path.join(MainPath, '%s+%s_%s+%s_%s_%s_%s.png' % (ICFG.sat1, ICFG.sensor1, ICFG.sat2, ICFG.sensor2, ICFG.ymd, Band, flag))
+    p.savefig(ofile, dpi=300)
+
+
 class COLLOC_COMM(object):
     """
     交叉匹配的公共类，首先初始化所有参数信息
@@ -215,134 +271,118 @@ class COLLOC_COMM(object):
             if 'MaskRough' in global_keys:
                 self.MaskRough = np.full((row, col), 0, 'i1')
             if 'PubIdx' in global_keys:
-                self.PubIdx = hdf5File.get('PubIdx')[:]
+                self.PubIdx = _get_band_dataset('PubIdx', hdf5File)
 
-            if 'S1_Time' in global_keys:
-                self.Time1 = hdf5File.get('S1_Time')[:]
-            if 'S1_Lon' in global_keys:
-                self.Lon1 = hdf5File.get('S1_Lon')[:]
-            if 'S1_Lat' in global_keys:
-                self.Lat1 = hdf5File.get('S1_Lat')[:]
-            if 'S1_SatA' in global_keys:
-                self.SatA1 = hdf5File.get('S1_SatA')[:]
-            if 'S1_SatZ' in global_keys:
-                self.SatZ1 = hdf5File.get('S1_SatZ')[:]
-            if 'S1_SunA' in global_keys:
-                self.SunA1 = hdf5File.get('S1_SunA')[:]
-            if 'S1_SunZ' in global_keys:
-                self.SunZ1 = hdf5File.get('S1_SunZ')[:]
-            if 'S1_LandCover' in global_keys:
-                self.LandCover1 = hdf5File.get('S1_LandCover')[:]
-            if 'S1_LandSeaMask' in global_keys:
-                self.LandSeaMask1 = hdf5File.get('S1_LandSeaMask')[:]
-            if 'S1_Spec_MaskRough_col' in global_keys:
-                self.spec_MaskRough_col = hdf5File.get('S1_Spec_MaskRough_col')[:]
-            if 'S1_Spec_MaskRough_row' in global_keys:
-                self.spec_MaskRough_row = hdf5File.get('S1_Spec_MaskRough_row')[:]
-            if 'S1_Spec_MaskRough_value' in global_keys:
-                self.spec_MaskRough_value = hdf5File.get('S1_Spec_MaskRough_value')[:]
+            self.Time1 = _get_band_dataset('S1_Time', hdf5File)
+            self.Lon1 = _get_band_dataset('S1_Lon', hdf5File)
+            self.Lat1 = _get_band_dataset('S1_Lat', hdf5File)
+            self.SatA1 = _get_band_dataset('S1_SatA', hdf5File)
+            self.SatZ1 = _get_band_dataset('S1_SatZ', hdf5File)
+            self.SunA1 = _get_band_dataset('S1_SoA', hdf5File)
+            self.SunZ1 = _get_band_dataset('S1_SoZ', hdf5File)
+            self.LandCover1 = _get_band_dataset('S1_LandCover', hdf5File)
+            self.LandSeaMask1 = _get_band_dataset('S1_LandSeaMask', hdf5File)
+            self.spec_MaskRough_col = _get_band_dataset(
+                'S1_Spec_MaskRough_col', hdf5File)
+            self.spec_MaskRough_row = _get_band_dataset(
+                'S1_Spec_MaskRough_row', hdf5File)
+            self.spec_MaskRough_value = _get_band_dataset(
+                'S1_Spec_MaskRough_value', hdf5File)
 
-            if 'S2_Time' in global_keys:
-                self.Time2 = hdf5File.get('S2_Time')[:]
-            if 'S2_Lon' in global_keys:
-                self.Lon2 = hdf5File.get('S2_Lon')[:]
-            if 'S2_Lat' in global_keys:
-                self.Lat2 = hdf5File.get('S2_Lat')[:]
-            if 'S2_SatA' in global_keys:
-                self.SatA2 = hdf5File.get('S2_SatA')[:]
-            if 'S2_SatZ' in global_keys:
-                self.SatZ2 = hdf5File.get('S2_SatZ')[:]
-            if 'S2_SunA' in global_keys:
-                self.SunA2 = hdf5File.get('S2_SunA')[:]
-            if 'S2_SunZ' in global_keys:
-                self.SunZ2 = hdf5File.get('S2_SunZ')[:]
-            if 'S2_LandCover' in global_keys:
-                self.LandCover2 = hdf5File.get('S2_LandCover')[:]
-            if 'S2_LandSeaMask' in global_keys:
-                self.LandSeaMask2 = hdf5File.get('S2_LandSeaMask')[:]
-            if 'S2_Spec_MaskRough_col' in global_keys:
-                self.spec_MaskRough_col = hdf5File.get('S2_Spec_MaskRough_col')[:]
-            if 'S2_Spec_MaskRough_row' in global_keys:
-                self.spec_MaskRough_row = hdf5File.get('S2_Spec_MaskRough_row')[:]
-            if 'S2_Spec_MaskRough_value' in global_keys:
-                self.spec_MaskRough_value = hdf5File.get('S2_Spec_MaskRough_value')[:]
+            self.Time2 = _get_band_dataset('S2_Time', hdf5File)
+            self.Lon2 = _get_band_dataset('S2_Lon', hdf5File)
+            self.Lat2 = _get_band_dataset('S2_Lat', hdf5File)
+            self.SatA2 = _get_band_dataset('S2_SatA', hdf5File)
+            self.SatZ2 = _get_band_dataset('S2_SatZ', hdf5File)
+            self.SunA2 = _get_band_dataset('S2_SoA', hdf5File)
+            self.SunZ2 = _get_band_dataset('S2_SoZ', hdf5File)
+            self.LandCover2 = _get_band_dataset('S2_LandCover', hdf5File)
+            self.LandSeaMask2 = _get_band_dataset('S2_LandSeaMask', hdf5File)
+            self.spec_MaskRough_col = _get_band_dataset(
+                'S2_Spec_MaskRough_col', hdf5File)
+            self.spec_MaskRough_row = _get_band_dataset(
+                'S2_Spec_MaskRough_row', hdf5File)
+            self.spec_MaskRough_value = _get_band_dataset(
+                'S2_Spec_MaskRough_value', hdf5File)
 
             for band in MCFG.chan1:
-                band_keys = hdf5File.get(band).keys()
-                if 'MaskFine' in band_keys:
-                    self.MaskFine[band] = np.full((row, col), 0, 'i1')
+                self.MaskFine[band] = np.full((row, col), 0, 'i1')
+                self.FovDnMean1[band] = _get_band_dataset(
+                    'S1_FovDnMean', hdf5File, band)
+                self.FovDnStd1[band] = _get_band_dataset(
+                    'S1_FovDnStd', hdf5File, band)
+                self.FovRefMean1[band] = _get_band_dataset(
+                    'S1_FovRefMean', hdf5File, band)
+                self.FovRefStd1[band] = _get_band_dataset(
+                    'S1_FovRefStd', hdf5File, band)
+                self.FovRadMean1[band] = _get_band_dataset(
+                    'S1_FovRadMean', hdf5File, band)
+                self.FovRadStd1[band] = _get_band_dataset(
+                    'S1_FovRadStd', hdf5File, band)
+                self.FovTbbMean1[band] = _get_band_dataset(
+                    'S1_FovTbbMean', hdf5File, band)
+                self.FovTbbStd1[band] = _get_band_dataset(
+                    'S1_FovTbbStd', hdf5File, band)
 
-                if 'S1_FovDnMean' in band_keys:
-                    self.FovDnMean1[band] = hdf5File.get(band)['S1_FovDnMean'][:]
-                if 'S1_FovRefMean' in band_keys:
-                    self.FovRefMean1[band] = hdf5File.get(band)['S1_FovRefMean'][:]
-                if 'S1_FovRefStd' in band_keys:
-                    self.FovRefStd1[band] = hdf5File.get(band)['S1_FovRefStd'][:]
-                if 'S1_FovRadMean' in band_keys:
-                    self.FovRadMean1[band] = hdf5File.get(band)['S1_FovRadMean'][:]
-                if 'S1_FovRadStd' in band_keys:
-                    self.FovRadStd1[band] = hdf5File.get(band)['S1_FovRadStd'][:]
-                if 'S1_FovTbbMean' in band_keys:
-                    self.FovTbbMean1[band] = hdf5File.get(band)['S1_FovTbbMean'][:]
-                if 'S1_FovTbbStd' in band_keys:
-                    self.FovTbbStd1[band] = hdf5File.get(band)['S1_FovTbbStd'][:]
+                self.EnvDnMean1[band] = _get_band_dataset(
+                    'S1_EnvDnMean', hdf5File, band)
+                self.EnvDnStd1[band] = _get_band_dataset(
+                    'S1_EnvDnStd', hdf5File, band)
+                self.EnvRefMean1[band] = _get_band_dataset(
+                    'S1_EnvRefMean', hdf5File, band)
+                self.EnvRefStd1[band] = _get_band_dataset(
+                    'S1_EnvRefStd', hdf5File, band)
+                self.EnvRadMean1[band] = _get_band_dataset(
+                    'S1_EnvRadMean', hdf5File, band)
+                self.EnvRadStd1[band] = _get_band_dataset(
+                    'S1_EnvRadStd', hdf5File, band)
+                self.EnvTbbMean1[band] = _get_band_dataset(
+                    'S1_EnvTbbMean', hdf5File, band)
+                self.EnvTbbStd1[band] = _get_band_dataset(
+                    'S1_nvTbbStd', hdf5File, band)
+                self.SV1[band] = _get_band_dataset(
+                    'S1_SV', hdf5File, band)
+                self.BB1[band] = _get_band_dataset(
+                    'S1_BB', hdf5File, band)
 
-                if 'S1_EnvDnMean' in band_keys:
-                    self.EnvDnMean1[band] = hdf5File.get(band)['S1_EnvDnMean'][:]
-                if 'S1_EnvDnStd' in band_keys:
-                    self.EnvDnStd1[band] = hdf5File.get(band)['S1_EnvDnStd'][:]
-                if 'S1_EnvRefMean' in band_keys:
-                    self.EnvRefMean1[band] = hdf5File.get(band)['S1_EnvRefMean'][:]
-                if 'S1_EnvRefStd' in band_keys:
-                    self.EnvRefStd1[band] = hdf5File.get(band)['S1_EnvRefStd'][:]
-                if 'S1_EnvRadMean' in band_keys:
-                    self.EnvRadMean1[band] = hdf5File.get(band)['S1_EnvRadMean'][:]
-                if 'S1_EnvRadStd' in band_keys:
-                    self.EnvRadStd1[band] = hdf5File.get(band)['S1_EnvRadStd'][:]
-                if 'S1_EnvTbbMean' in band_keys:
-                    self.EnvTbbMean1[band] = hdf5File.get(band)['S1_EnvTbbMean'][:]
-                if 'S1_EnvTbbStd' in band_keys:
-                    self.EnvTbbStd1[band] = hdf5File.get(band)['S1_EnvTbbStd'][:]
-                if 'S1_SV' in band_keys:
-                    self.SV1[band] = hdf5File.get(band)['S1_SV'][:]
-                if 'S1_BB' in band_keys:
-                    self.BB1[band] = hdf5File.get(band)['S1_BB'][:]
+                # SAT2 FOV ENV
+                self.FovDnMean2[band] = _get_band_dataset(
+                    'S2_FovDnMean', hdf5File, band)
+                self.FovDnStd2[band] = _get_band_dataset(
+                    'S2_FovDnStd', hdf5File, band)
+                self.FovRefMean2[band] = _get_band_dataset(
+                    'S2_FovRefMean', hdf5File, band)
+                self.FovRefStd2[band] = _get_band_dataset(
+                    'S2_FovRefStd', hdf5File, band)
+                self.FovRadMean2[band] = _get_band_dataset(
+                    'S2_FovRadMean', hdf5File, band)
+                self.FovRadStd2[band] = _get_band_dataset(
+                    'S2_FovRadStd', hdf5File, band)
+                self.FovTbbMean2[band] = _get_band_dataset(
+                    'S2_FovTbbMean', hdf5File, band)
+                self.FovTbbStd2[band] = _get_band_dataset(
+                    'S2_FovTbbStd', hdf5File, band)
 
-                if 'S2_FovDnMean' in band_keys:
-                    self.FovDnMean2[band] = hdf5File.get(band)['S2_FovDnMean'][:]
-                if 'S2_FovRefMean' in band_keys:
-                    self.FovRefMean2[band] = hdf5File.get(band)['S2_FovRefMean'][:]
-                if 'S2_FovRefStd' in band_keys:
-                    self.FovRefStd2[band] = hdf5File.get(band)['S2_FovRefStd'][:]
-                if 'S2_FovRadMean' in band_keys:
-                    self.FovRadMean2[band] = hdf5File.get(band)['S2_FovRadMean'][:]
-                if 'S2_FovRadStd' in band_keys:
-                    self.FovRadStd2[band] = hdf5File.get(band)['S2_FovRadStd'][:]
-                if 'S2_FovTbbMean' in band_keys:
-                    self.FovTbbMean2[band] = hdf5File.get(band)['S2_FovTbbMean'][:]
-                if 'S2_FovTbbStd' in band_keys:
-                    self.FovTbbStd2[band] = hdf5File.get(band)['S2_FovTbbStd'][:]
-
-                if 'S2_EnvDnMean' in band_keys:
-                    self.EnvDnMean2[band] = hdf5File.get(band)['S2_EnvDnMean'][:]
-                if 'S2_EnvDnStd' in band_keys:
-                    self.EnvDnStd2[band] = hdf5File.get(band)['S2_EnvDnStd'][:]
-                if 'S2_EnvRefMean' in band_keys:
-                    self.EnvRefMean2[band] = hdf5File.get(band)['S2_EnvRefMean'][:]
-                if 'S2_EnvRefStd' in band_keys:
-                    self.EnvRefStd2[band] = hdf5File.get(band)['S2_EnvRefStd'][:]
-                if 'S2_EnvRadMean' in band_keys:
-                    self.EnvRadMean2[band] = hdf5File.get(band)['S2_EnvRadMean'][:]
-                if 'S2_EnvRadStd' in band_keys:
-                    self.EnvRadStd2[band] = hdf5File.get(band)['S2_EnvRadStd'][:]
-                if 'S2_EnvTbbMean' in band_keys:
-                    self.EnvTbbMean2[band] = hdf5File.get(band)['S2_EnvTbbMean'][:]
-                if 'S2_EnvTbbStd' in band_keys:
-                    self.EnvTbbStd2[band] = hdf5File.get(band)['S2_EnvTbbStd'][:]
-                if 'S2_SV' in band_keys:
-                    self.SV2[band] = hdf5File.get(band)['S2_SV'][:]
-                if 'S2_BB' in band_keys:
-                    self.BB2[band] = hdf5File.get(band)['S2_BB'][:]
+                self.EnvDnMean2[band] = _get_band_dataset(
+                    'S2_EnvDnMean', hdf5File, band)
+                self.EnvDnStd2[band] = _get_band_dataset(
+                    'S2_EnvDnStd', hdf5File, band)
+                self.EnvRefMean2[band] = _get_band_dataset(
+                    'S2_EnvRefMean', hdf5File, band)
+                self.EnvRefStd2[band] = _get_band_dataset(
+                    'S2_EnvRefStd', hdf5File, band)
+                self.EnvRadMean2[band] = _get_band_dataset(
+                    'S2_EnvRadMean', hdf5File, band)
+                self.EnvRadStd2[band] = _get_band_dataset(
+                    'S2_EnvRadStd', hdf5File, band)
+                self.EnvTbbMean2[band] = _get_band_dataset(
+                    'S2_EnvTbbMean', hdf5File, band)
+                self.EnvTbbStd2[band] = _get_band_dataset(
+                    'S2_nvTbbStd', hdf5File, band)
+                self.SV2[band] = _get_band_dataset(
+                    'S2_SV', hdf5File, band)
+                self.BB2[band] = _get_band_dataset(
+                    'S2_BB', hdf5File, band)
 
     def save_rough_data(self, P1, P2, D1, D2, modeCfg):
         """
@@ -985,26 +1025,29 @@ class COLLOC_COMM(object):
         for Band in MCFG.chan1:
             idx = np.where(self.MaskFine[Band] > 0)
             if self.FovRefMean1[Band] is not None and Band in MCFG.axis_ref:
-                print('enter plot ref')
+                print(Band, 'enter plot ref')
                 x = self.FovRefMean1[Band][idx]
                 y = self.FovRefMean2[Band][idx]
-                print(len(y))
+                print(Band, len(x))
                 if len(x) >= 2:
                     value_min = value_max = None
                     flag = 'Ref'
                     print('ref', Band, np.min(x), np.max(x),
                           np.min(y), np.max(y))
-                    if MCFG.AutoRange:
+                    if MCFG.AutoRange == 'ON':
+                        print(Band, 'enter plot ref 3')
                         value_min = np.min([np.min(x), np.min(y)])
                         value_max = np.max([np.max(x), np.max(y)])
                     elif len(MCFG.axis_ref) != 0:
+                        print(Band, 'enter plot ref 4')
                         value_min = MCFG.axis_ref[Band][0]
                         value_max = MCFG.axis_ref[Band][1]
-                    if value_min and value_max:
-                        print('enter plot ref 1')
+                        print(Band, value_min, value_max)
+                    if value_min is not None and value_max is not None:
+                        print(Band, 'enter plot ref 1')
                         regression(x, y, value_min, value_max,
                                    flag, ICFG, MCFG, Band)
-                        print('enter plot ref 2')
+                        print(Band, 'enter plot ref 2')
 
             if self.FovRadMean1[Band] is not None and Band in MCFG.axis_rad:
                 x = self.FovRadMean1[Band][idx]
@@ -1014,13 +1057,13 @@ class COLLOC_COMM(object):
                     flag = 'Rad'
                     print('rad', Band, np.min(x), np.max(x),
                           np.min(y), np.max(y))
-                    if MCFG.AutoRange:
+                    if MCFG.AutoRange == 'ON':
                         value_min = np.min([np.min(x), np.min(y)])
                         value_max = np.max([np.max(x), np.max(y)])
                     elif len(MCFG.axis_rad) != 0:
                         value_min = MCFG.axis_rad[Band][0]
                         value_max = MCFG.axis_rad[Band][1]
-                    if value_min and value_max:
+                    if value_min is not None and value_max is not None:
                         regression(x, y, value_min, value_max,
                                    flag, ICFG, MCFG, Band)
 
@@ -1032,48 +1075,12 @@ class COLLOC_COMM(object):
                     flag = 'Tbb'
                     print('tbb', Band, np.min(x),
                           np.max(x), np.min(y), np.max(y))
-                    if MCFG.AutoRange:
+                    if MCFG.AutoRange == 'ON':
                         value_min = np.min([np.min(x), np.min(y)])
                         value_max = np.max([np.max(x), np.max(y)])
                     elif len(MCFG.axis_tbb) != 0:
                         value_min = MCFG.axis_tbb[Band][0]
                         value_max = MCFG.axis_tbb[Band][1]
-                    if value_min and value_max:
+                    if value_min is not None and value_max is not None:
                         regression(x, y, value_min, value_max,
                                    flag, ICFG, MCFG, Band)
-
-
-def regression(x, y, value_min, value_max, flag, ICFG, MCFG, Band):
-
-    # FY4分布
-    MainPath, MainFile = os.path.split(ICFG.ofile)
-    if not os.path.isdir(MainPath):
-        os.makedirs(MainPath)
-
-    meanbais = (np.mean(x - y) / np.mean(y)) * 100.
-
-    p = dv_plt.dv_scatter(figsize=(7, 5))
-    p.easyplot(x, y, None, None, marker='o', markersize=5)
-
-    p.xlim_min = p.ylim_min = value_min
-    p.xlim_max = p.ylim_max = value_max
-
-    p.title = u'%s' % (ICFG.ymd)
-    p.xlabel = u'%s %s %s' % (ICFG.sat1, ICFG.sensor1, flag)
-    p.ylabel = u'%s %s %s' % (ICFG.sat2, ICFG.sensor2, flag)
-    # 计算AB
-    ab = np.polyfit(x, y, 1)
-    p.regression(ab[0], ab[1], 'b')
-
-    # 计算相关性
-    p.show_leg = True
-    r = np.corrcoef(x, y)
-    rr = r[0][1] * r[0][1]
-    nums = len(x)
-    # 绘制散点
-    strlist = [[r'$%0.4fx%+0.4f (R=%0.4f) $' % (ab[0], ab[1], rr), r'count:%d' % nums, r'%sMeanBias: %0.4f' % (flag, meanbais)]]
-    p.annotate(strlist, 'left', 'r')
-    ofile = os.path.join(MainPath, '%s+%s_%s+%s_%s_%s_%s.png' % (ICFG.sat1, ICFG.sensor1, ICFG.sat2, ICFG.sensor2, ICFG.ymd, Band, flag))
-    p.savefig(ofile, dpi=300)
-
-
