@@ -1025,29 +1025,23 @@ class COLLOC_COMM(object):
         for Band in MCFG.chan1:
             idx = np.where(self.MaskFine[Band] > 0)
             if self.FovRefMean1[Band] is not None and Band in MCFG.axis_ref:
-                print(Band, 'enter plot ref')
                 x = self.FovRefMean1[Band][idx]
                 y = self.FovRefMean2[Band][idx]
-                print(Band, len(x))
                 if len(x) >= 2:
                     value_min = value_max = None
                     flag = 'Ref'
-                    print('ref', Band, np.min(x), np.max(x),
+                    print('ref', Band, len(x), np.min(x), np.max(x),
                           np.min(y), np.max(y))
                     if MCFG.AutoRange == 'ON':
-                        print(Band, 'enter plot ref 3')
                         value_min = np.min([np.min(x), np.min(y)])
                         value_max = np.max([np.max(x), np.max(y)])
                     elif len(MCFG.axis_ref) != 0:
-                        print(Band, 'enter plot ref 4')
                         value_min = MCFG.axis_ref[Band][0]
                         value_max = MCFG.axis_ref[Band][1]
                         print(Band, value_min, value_max)
                     if value_min is not None and value_max is not None:
-                        print(Band, 'enter plot ref 1')
                         regression(x, y, value_min, value_max,
                                    flag, ICFG, MCFG, Band)
-                        print(Band, 'enter plot ref 2')
 
             if self.FovRadMean1[Band] is not None and Band in MCFG.axis_rad:
                 x = self.FovRadMean1[Band][idx]
@@ -1055,7 +1049,7 @@ class COLLOC_COMM(object):
                 if len(x) >= 2:
                     value_min = value_max = None
                     flag = 'Rad'
-                    print('rad', Band, np.min(x), np.max(x),
+                    print('rad', Band, len(x), np.min(x), np.max(x),
                           np.min(y), np.max(y))
                     if MCFG.AutoRange == 'ON':
                         value_min = np.min([np.min(x), np.min(y)])
@@ -1073,7 +1067,7 @@ class COLLOC_COMM(object):
                 if len(x) >= 2:
                     value_min = value_max = None
                     flag = 'Tbb'
-                    print('tbb', Band, np.min(x),
+                    print('tbb', Band, len(x), np.min(x),
                           np.max(x), np.min(y), np.max(y))
                     if MCFG.AutoRange == 'ON':
                         value_min = np.min([np.min(x), np.min(y)])
